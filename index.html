@@ -48,8 +48,25 @@ body.dark .igt-footer strong{color:#8bceff}
   <label for="igt-auth-password">Mot de passe</label><input id="igt-auth-password" type="password" autocomplete="current-password" required placeholder="Votre mot de passe">
   <div id="igt-auth-confirm-wrap" hidden><label for="igt-auth-confirm">Confirmer le nouveau mot de passe</label><input id="igt-auth-confirm" type="password" autocomplete="new-password" placeholder="Répétez le nouveau mot de passe"></div>
   <button id="igt-auth-submit" type="submit">Se connecter</button>
+  <button id="igt-open-registration" type="button" style="width:100%;margin-top:10px;padding:12px;border:1px solid #0d4772;border-radius:9px;background:#fff;color:#0d4772;font-weight:700;font-size:14px">Demander un accès à l’annuaire</button>
   <div id="igt-auth-message" role="status" aria-live="polite"></div>
-  <p style="font-size:12px;margin-bottom:0">Pour obtenir un accès, veuillez contacter l’administration de l’annuaire.</p>
+  <p style="font-size:12px;margin-bottom:0">Votre demande sera vérifiée par l’administration avant toute activation du compte.</p>
+ </form>
+</div>
+<div id="igt-registration-panel" hidden role="dialog" aria-modal="true" aria-labelledby="igt-reg-title" style="position:fixed;inset:0;z-index:1000000;background:#061a30ee;overflow:auto;padding:18px;box-sizing:border-box">
+ <form id="igt-registration-form" style="max-width:480px;margin:25px auto;background:#fff;color:#172334;border-radius:18px;padding:24px;box-shadow:0 20px 70px #0006;font-family:Arial,sans-serif">
+  <div style="font-size:11px;letter-spacing:1px;font-weight:700;color:#b18a35">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
+  <h2 id="igt-reg-title" style="color:#123d60;margin:8px 0">Demande d’accès à l’ANI-IGT</h2>
+  <p style="color:#5b6572;line-height:1.45">Remplissez vos informations exactement comme elles figurent dans le registre officiel du personnel. L’accès sera activé après vérification et approbation.</p>
+  <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-name">Nom complet</label><input id="igt-reg-name" required maxlength="180" autocomplete="name" placeholder="Nom et post-nom" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
+  <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-category">Catégorie</label><select id="igt-reg-category" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px;background:#fff"><option value="">Sélectionner votre catégorie</option><option value="inspecteur_travail">Inspecteur du travail</option><option value="controleur_travail">Contrôleur du travail</option><option value="agent_administratif">Agent administratif</option></select>
+  <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-matricule">Numéro matricule</label><input id="igt-reg-matricule" maxlength="80" placeholder="Votre matricule officiel" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
+  <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-phone">Numéro de téléphone</label><input id="igt-reg-phone" type="tel" required maxlength="30" autocomplete="tel" placeholder="Ex. +243 8XX XXX XXX" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
+  <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-email">Adresse e-mail</label><input id="igt-reg-email" type="email" required maxlength="254" autocomplete="email" placeholder="nom@exemple.com" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
+  <div style="position:absolute;left:-10000px" aria-hidden="true"><label for="igt-reg-website">Ne pas remplir</label><input id="igt-reg-website" tabindex="-1" autocomplete="off"></div>
+  <div id="igt-reg-message" role="status" aria-live="polite" style="margin-top:12px;min-height:22px;font-size:14px"></div>
+  <button id="igt-reg-submit" type="submit" style="width:100%;margin-top:12px;padding:13px;border:0;border-radius:9px;background:#0d4772;color:#fff;font-weight:700;font-size:15px">Envoyer ma demande</button>
+  <button id="igt-close-registration" type="button" style="width:100%;margin-top:9px;padding:11px;border:1px solid #ccd4df;border-radius:9px;background:#fff;color:#334155;font-weight:600">Retour à la connexion</button>
  </form>
 </div>
 <div id="igt-auth-user" hidden></div>
@@ -90,7 +107,7 @@ const gradeDescriptions={'110':'Grade 110','120':'Inspecteur Principal du Travai
 function agentPrefix(f){let x=(f||'').toLowerCase();if(x.includes('inspecteur'))return'IT';if(x.includes('contrôleur')||x.includes('controleur'))return'CT';if(x.includes('administrateur'))return'ADM';if(x.includes('attaché')||x.includes('attache'))return'ATA';if(x.includes('agent d’administration')||x.includes('agent administration'))return'AGA';if(x.includes('secrétaire général')||x.includes('secretaire general'))return'SG';if(x.includes('directeur'))return'DIR';if(x.includes('chef de division'))return'CD';if(x.includes('chef de bureau'))return'CB';return'AUT'}
 function agentReference(a,f){if(a.reference_personnelle)return a.reference_personnelle;let digits=String(a.matricule_transcrit||'').replace(/\D/g,''),seq=(digits.slice(-5)||'00000').padStart(5,'0');return agentPrefix(f)+'-'+String(a.grade_transcrit||'').replace(/\D/g,'')+'-'+seq+'-2026'}
 function photoKey(m){return 'igt-photo-'+norm(m)}function photoReference(name,m){let safe=String(name||'AGENT').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_|_$/g,'');return safe+'_'+String(m||'').replace(/\D/g,'')+'.jpg'}function agentPhoto(m){return localStorage.getItem(photoKey(m))||''}function handleAgentPhoto(input,m,name){let file=input.files&&input.files[0];if(!file)return;let ref=photoReference(name,m),r=new FileReader();r.onload=e=>{localStorage.setItem(photoKey(m),e.target.result);localStorage.setItem(photoKey(m)+'-reference',ref);document.querySelectorAll('[data-photo="'+norm(m)+'"]').forEach(x=>{x.innerHTML='<img src="'+e.target.result+'" alt="Photo passeport '+ref+'">'});toast('Photo associée sous la référence : '+ref);};r.readAsDataURL(file)}
-function card(a){let d=dossier(a),identity=cleanIdentity(a.nom_complet_transcrit,a),mat=esc(a.matricule_transcrit),photo=agentPhoto(a.matricule_transcrit),grade=esc(a.grade_transcrit)+' — '+(gradeDescriptions[a.grade_transcrit]||'Non trouvé');let photoHtml=photo?'<img src="'+photo+'" alt="Photo passeport">':'<span>PHOTO<br>PASSEPORT</span>';let row=(label,value,cls='')=>'<div class="profile-row '+cls+'"><span>'+label+' :</span><b>'+value+'</b></div>';return '<article class="agent profile official-profile"><div class="profile-top"><div class="passport" data-photo="'+norm(a.matricule_transcrit)+'">'+photoHtml+'</div></div><div class="profile-function-band"><b>'+grade+'</b><span>'+ (d.fonction?esc(d.fonction):'Fonction non renseignée') +'</span></div><div class="profile-rows">'+row('Nom',esc(identity))+row('Matricule',mat)+row('Grade',grade)+row('Fonction',d.fonction?esc(d.fonction):'')+row('Lieu d’affectation',esc(d.lieu))+row('Province',esc(d.province))+row('Direction / Antenne',esc(d.service))+row('Banque payeuse',d.banque)+(a.nature_designation?row('Nature de la désignation',esc(a.nature_designation)):'')+row('Statut','<em class="regular">✔ Agent régulier</em>')+row('Numéro de référence',agentReference(a,d.fonction))+'</div><button class="fullfile" onclick="openAgentFile(&quot;'+esc(a.id)+'&quot;)">Voir la fiche numérique complète</button></article>'}
+function card(a){let d=dossier(a),identity=cleanIdentity(a.nom_complet_transcrit,a),mat=esc(a.matricule_transcrit),photo=agentPhoto(a.matricule_transcrit),grade=esc(a.grade_transcrit)+' — '+(gradeDescriptions[a.grade_transcrit]||'Non trouvé');let photoHtml=photo?'<img src="'+photo+'" alt="Photo passeport">':'<span>PHOTO<br>PASSEPORT</span>';let row=(label,value,cls='')=>'<div class="profile-row '+cls+'"><span>'+label+' :</span><b>'+value+'</b></div>';return '<article class="agent profile official-profile"><div class="profile-top"><div class="passport" data-photo="'+norm(a.matricule_transcrit)+'">'+photoHtml+'</div></div><div class="profile-function-band"><b>'+grade+'</b><span>'+ (d.fonction?esc(d.fonction):'Fonction non renseignée') +'</span></div><div class="profile-rows">'+row('Nom',esc(identity))+row('Matricule',mat)+row('Grade',grade)+row('Fonction',d.fonction?esc(d.fonction):'')+row('Lieu d’affectation',esc(d.lieu))+row('Province',esc(d.province))+row('Direction / Antenne',esc(d.service))+row('Banque payeuse',d.banque)+(a.nature_designation?row('Nature de la désignation',esc(a.nature_designation)):'')+row('Statut','<em class="regular">✔ Agent régulier</em>')+row('Téléphone','<span data-igt-phone="'+norm(a.matricule_transcrit)+'">Chargement…</span>')+row('Numéro de référence',agentReference(a,d.fonction))+'</div><button class="fullfile" onclick="openAgentFile(&quot;'+esc(a.id)+'&quot;)">Voir la fiche numérique complète</button></article>'}
 
 function adminCard(a){let rows=[['Numéro matricule',a.matricule],['Grade',a.grade],['Fonction',a.fonction],['Lieu d’affectation',a.lieu],['Province',a.province],['Direction / Antenne',a.direction],['Statut',a.statut],['Sexe',a.sexe]].filter(x=>x[1]);return '<article class="agent profile official-profile"><div class="profile-top"><div class="passport"><span>PHOTO<br>PASSEPORT</span></div><div class="profile-identity"><h3>'+esc(a.nom_complet)+'</h3><p>Agent administratif</p></div></div><div class="profile-rows"><div class="profile-row"><span>Nom :</span><b>'+esc(a.nom_complet)+'</b></div>'+rows.map(x=>'<div class="profile-row"><span>'+esc(x[0])+' :</span><b>'+esc(x[1])+'</b></div>').join('')+'</div></article>'}
 function showSearch(target,q){
@@ -101,6 +118,7 @@ function showSearch(target,q){
  if(list.length>1){el.innerHTML='<div class="search-results-heading"><b>Plusieurs correspondances</b><span>Affinez votre recherche avec le nom complet ou le matricule pour afficher une seule fiche.</span></div>';return;}
  const a=list[0];
  el.innerHTML='<div class="search-results-heading"><b>1 agent trouvé</b><span>Correspondance : '+esc(raw)+'</span></div><div class="search-result-list">'+card(a)+'</div>';
+ loadDirectoryPhone(a);
 }
 function clearResultsOnEdit(){let box=document.getElementById('results');if(box&&box.innerHTML.trim())box.innerHTML=''}
 function syncSearchClear(){const input=document.getElementById('searchQuery'),clear=document.getElementById('searchClear');if(clear)clear.hidden=!(input&&input.value.trim())}
@@ -126,7 +144,7 @@ const localLabels={en:{'Vue d’ensemble nationale':'National overview','Inspect
 function applyLocalTranslation(lang){let dict=localLabels[lang];if(!dict)return;let walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>{let v=n.nodeValue.trim();if(dict[v])n.nodeValue=n.nodeValue.replace(v,dict[v])})}
 const translations={en:{title:'General Labour Inspectorate',tagline:'A unified digital platform to protect work, manage missions and bring administration closer to citizens.',askai:'✦ Ask the AI'},ln:{title:'Inspection Générale du Travail',tagline:'Système numérique mpo na kobatela mosala mpe kotambwisa misala.',askai:'✦ Tuna IA'},sw:{title:'Ukaguzi Mkuu wa Kazi',tagline:'Jukwaa la kidijitali la kulinda kazi na kusimamia misheni.',askai:'✦ Uliza IA'},lua:{title:'Inspection Générale du Travail',tagline:'Système wa mu njila wa kuikala ne mudimu ne kutungunuka missions.',askai:'✦ Buza IA'},kg:{title:'Inspection Générale du Travail',tagline:'Système ya ntangu nyonso sambu na kutanina kisalu mpe kutwadisa bamission.',askai:'✦ Yula IA'}};
 function translatePage(lang){localStorage.setItem('igt-language',lang);let t=translations[lang];if(t)document.querySelectorAll('[data-i18n]').forEach(e=>{if(t[e.dataset.i18n])e.textContent=t[e.dataset.i18n]});if(!navigator.onLine){applyLocalTranslation(lang);return}let combo=document.querySelector('.goog-te-combo');if(combo){combo.value=lang;combo.dispatchEvent(new Event('change'));return}document.cookie='googtrans=/fr/'+lang+';path=/';location.reload()}
-function openAgentFile(m){let a=officialAgents.find(x=>x.id===m)||officialAgents.find(x=>norm(x.matricule_transcrit)===norm(m));if(!a)return;let d=dossier(a);document.getElementById('modalcontent').innerHTML='<h2>Fiche numérique de l’agent</h2>'+card(a)+'<div class="article"><b>Informations complémentaires sécurisées</b><p>Photo · inspection · téléphone · e-mail · date de naissance · date d’engagement · historique des affectations · sanctions · décorations · formations · documents · signature électronique · QR Code · code-barres.</p><p class="official-note">Ces éléments sont visibles ou administrés uniquement lorsqu’ils sont renseignés dans le dossier officiel et selon les droits d’accès.</p><div style="font-size:52px;letter-spacing:-5px">▦▦▦</div></div>';document.getElementById('modal').classList.remove('hidden')}
+function openAgentFile(m){let a=officialAgents.find(x=>x.id===m)||officialAgents.find(x=>norm(x.matricule_transcrit)===norm(m));if(!a)return;let d=dossier(a);document.getElementById('modalcontent').innerHTML='<h2>Fiche numérique de l’agent</h2>'+card(a)+'<div class="article"><b>Informations complémentaires sécurisées</b><p>Photo · inspection · téléphone · e-mail · date de naissance · date d’engagement · historique des affectations · sanctions · décorations · formations · documents · signature électronique · QR Code · code-barres.</p><p class="official-note">Ces éléments sont visibles ou administrés uniquement lorsqu’ils sont renseignés dans le dossier officiel et selon les droits d’accès.</p><div style="font-size:52px;letter-spacing:-5px">▦▦▦</div></div>';document.getElementById('modal').classList.remove('hidden');loadDirectoryPhone(a)}
 function enableMapGestures(){let m=document.getElementById('professional-map');if(!m||m.dataset.gestures)return;m.dataset.gestures='1';let scale=1,x=0,y=0,start=null,apply=()=>m.style.setProperty('--map-transform','translate('+x+'px,'+y+'px) scale('+scale+')');m.addEventListener('wheel',e=>{e.preventDefault();scale=Math.max(1,Math.min(2.4,scale+(e.deltaY<0?.12:-.12)));apply()},{passive:false});m.addEventListener('pointerdown',e=>{start={x:e.clientX,y:e.clientY,ox:x,oy:y};m.setPointerCapture(e.pointerId)});m.addEventListener('pointermove',e=>{if(!start)return;x=start.ox+e.clientX-start.x;y=start.oy+e.clientY-start.y;apply()});m.addEventListener('pointerup',()=>start=null);m.resetZoom=()=>{scale=1;x=0;y=0;apply()}}
 const heroBackgrounds=['uploads/hero-1.jpg','uploads/hero-2.jpg','uploads/hero-3.jpg','uploads/hero-4.jpg','uploads/hero-5.jpg'];function startHeroCarousel(){let hero=document.getElementById('portal-hero'),i=0;if(!hero)return;let next=()=>{let path=heroBackgrounds[i++%heroBackgrounds.length],test=new Image();test.onload=()=>{hero.style.backgroundImage='url("'+path+'")';hero.classList.add('hero-photo')};test.src=path};next();setInterval(next,15000)}
 function updateCoverage(){let ids={Kinshasa:['cover-kin','bar-kin'],'Kongo-Central':['cover-kc','bar-kc'],'Haut-Katanga':['cover-hk','bar-hk'],'Kasaï':['cover-kasai','bar-kasai'],'Nord-Kivu':['cover-nk','bar-nk']},max=1,vals={};Object.keys(ids).forEach(p=>{let g=officialAgents.filter(a=>a.province_affectation===p),i=g.filter(a=>/inspecteur|\bipt\b|\bit\b/i.test(a.fonction_et_affectation_transcrites||'')||['110','120','130','140'].includes(String(a.grade_transcrit))).length,c=g.filter(a=>/contrôleur|controleur/i.test(a.fonction_et_affectation_transcrites||'')||String(a.grade_transcrit)==='210').length;vals[p]={i,c,total:i+c};max=Math.max(max,i+c)});Object.entries(ids).forEach(([p,[text,bar]])=>{let v=vals[p],t=document.getElementById(text),b=document.getElementById(bar);if(t)t.textContent=v.i+' I · '+v.c+' C';if(b)b.style.width=(v.total/max*100)+'%'})}
@@ -296,4 +314,72 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
  });
 })();
 </script>
+
+<script id="igt-annuaire-v2-registration-phone">
+(function(){
+ const URL='https://icymfsvbuandgvrhwmaw.supabase.co';
+ const KEY='sb_publishable_ehMQbO5ac2-9RSdiOmxKJw_yPw2ES7z';
+ if(!window.supabase||!window.supabase.createClient)return;
+ const db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ const panel=document.getElementById('igt-registration-panel');
+ const open=document.getElementById('igt-open-registration');
+ const close=document.getElementById('igt-close-registration');
+ const form=document.getElementById('igt-registration-form');
+ const msg=document.getElementById('igt-reg-message');
+ const send=document.getElementById('igt-reg-submit');
+ if(open)open.addEventListener('click',()=>{panel.hidden=false;msg.textContent='';});
+ if(close)close.addEventListener('click',()=>{panel.hidden=true;});
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();msg.style.color='#334155';msg.textContent='Envoi de votre demande…';send.disabled=true;send.textContent='Envoi…';
+  const payload={
+   nom_complet:document.getElementById('igt-reg-name').value.trim(),
+   categorie:document.getElementById('igt-reg-category').value,
+   matricule:document.getElementById('igt-reg-matricule').value.trim(),
+   telephone:document.getElementById('igt-reg-phone').value.trim(),
+   email:document.getElementById('igt-reg-email').value.trim().toLowerCase(),
+   website:document.getElementById('igt-reg-website').value
+  };
+  try{
+   const {data,error}=await db.functions.invoke('igt-registration',{body:payload});
+   if(error)throw error;
+   msg.style.color='#08794f';msg.textContent=(data&&data.message)||'Votre demande a été reçue. Elle sera vérifiée par l’administration.';
+   form.reset();
+  }catch(err){
+   console.error('igt-registration',err);
+   msg.style.color='#b42318';msg.textContent='Impossible d’envoyer la demande. Vérifiez votre connexion ou réessayez plus tard.';
+  }finally{send.disabled=false;send.textContent='Envoyer ma demande';}
+ });
+ window.loadDirectoryPhone=async function(agent){
+  const matricule=String(agent?.matricule_transcrit||'').trim();
+  const nom=String(agent?.nom_complet_transcrit||'').trim();
+  const key=(matricule||nom).replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+  if(!key)return;
+  const selector='[data-igt-phone="'+key+'"]';
+  const nodes=()=>document.querySelectorAll(selector);
+  try{
+   if(!window.__igtPhoneCache)window.__igtPhoneCache={};
+   if(Object.prototype.hasOwnProperty.call(window.__igtPhoneCache,key)){
+    nodes().forEach(n=>n.textContent=window.__igtPhoneCache[key]||'Non renseigné');return;
+   }
+   let data=null,error=null;
+   if(matricule){
+    const result=await db.from('agents').select('telephone').eq('matricule',matricule).maybeSingle();
+    data=result.data;error=result.error;
+   }
+   if((error||!data) && nom){
+    const result=await db.from('agents').select('telephone').ilike('nom_complet',nom).maybeSingle();
+    data=result.data;error=result.error;
+   }
+   if(error)throw error;
+   const phone=String(data?.telephone||'').trim();
+   window.__igtPhoneCache[key]=phone;
+   nodes().forEach(n=>n.textContent=phone||'Non renseigné');
+  }catch(err){
+   console.warn('Lecture téléphone annuaire impossible. Vérifier la session et les droits de lecture agents.',err);
+   nodes().forEach(n=>n.textContent='Non renseigné');
+  }
+ };
+})();
+</script>
+
 </body></html>
