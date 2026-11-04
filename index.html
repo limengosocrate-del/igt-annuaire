@@ -186,7 +186,7 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
  const emailLabel=emailInput.previousElementSibling, passwordLabel=passwordInput.previousElementSibling;
  const confirmWrap=document.getElementById('igt-auth-confirm-wrap'), confirmInput=document.getElementById('igt-auth-confirm');
  const adminButton=document.getElementById('igt-open-admin');
- let passwordSetupMode=false, updatingPassword=false, expiryTimer=null, currentUser=null, currentProfile=null, remainingSeconds=0;
+ let passwordSetupMode=false, updatingPassword=false, expiryTimer=null, sessionValidationTimer=null, sessionStartPromise=null, sessionCheckBusy=false, currentUser=null, currentProfile=null, remainingSeconds=0;
  if(!window.supabase||!window.supabase.createClient){message.textContent='Service de connexion indisponible. Rechargez la page.';return;}
  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  window.igtSupabase=client;
@@ -195,17 +195,58 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
  function showPasswordSetup(){passwordSetupMode=true;gate.hidden=false;document.body.classList.add('igt-auth-pending');title.textContent='Définir votre mot de passe';intro.textContent='Créez votre mot de passe personnel.';emailLabel.hidden=true;emailInput.hidden=true;emailInput.required=false;passwordLabel.textContent='Nouveau mot de passe';passwordInput.value='';passwordInput.autocomplete='new-password';confirmWrap.hidden=false;submit.textContent='Enregistrer mon mot de passe';}
  function setMessage(text,color){message.textContent=text;message.style.color=color||'#a32626';}
  async function startSession(){
-  const {data,error}=await client.functions.invoke('igt-session-start',{body:{}});
-  if(error||!data?.success)throw new Error(data?.message||error?.message||'Impossible de démarrer la session.');
-  remainingSeconds=Number(data.expires_in_seconds)||0;
-  if(remainingSeconds<=0)throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
-  clearTimeout(expiryTimer);expiryTimer=setTimeout(async()=>{await client.auth.signOut();gate.hidden=false;toolsBox.hidden=true;userBox.hidden=true;document.body.classList.add('igt-auth-pending');setMessage('Votre session de 20 minutes est terminée. Veuillez vous reconnecter.','#b42318');},remainingSeconds*1000);
-  return data;
+  // Évite deux initialisations simultanées lors de SIGNED_IN et INITIAL_SESSION.
+  if(sessionStartPromise)return sessionStartPromise;
+  sessionStartPromise=(async()=>{
+   const {data,error}=await client.functions.invoke('igt-session-start',{body:{}});
+   if(error||!data?.success)throw new Error(data?.message||error?.message||'Impossible de démarrer la session.');
+   remainingSeconds=Number(data.expires_in_seconds)||0;
+   if(remainingSeconds<=0)throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
+   clearTimeout(expiryTimer);
+   expiryTimer=setTimeout(async()=>{
+    clearInterval(sessionValidationTimer);sessionValidationTimer=null;
+    currentUser=null;currentProfile=null;
+    await client.auth.signOut();
+    gate.hidden=false;toolsBox.hidden=true;userBox.hidden=true;
+    document.body.classList.add('igt-auth-pending');
+    setMessage('Votre session de 20 minutes est terminée. Veuillez vous reconnecter.','#b42318');
+   },remainingSeconds*1000);
+   return data;
+  })();
+  try{return await sessionStartPromise;}finally{sessionStartPromise=null;}
+ }
+ async function validateActiveSession(){
+  if(!currentUser||sessionCheckBusy)return;
+  sessionCheckBusy=true;
+  try{
+   // Le serveur vérifie à nouveau le statut du compte, la révocation et l'âge absolu.
+   const {data,error}=await client.functions.invoke('igt-session-start',{body:{}});
+   if(error||!data?.success)throw new Error(data?.message||error?.message||'Session révoquée ou expirée.');
+   const {data:profile,error:profileError}=await client.from('profiles')
+    .select('is_active').eq('id',currentUser.id).maybeSingle();
+   if(profileError)throw profileError;
+   if(!profile||profile.is_active!==true)throw new Error('Votre compte est suspendu. Contactez l’administrateur Pmiller.');
+   const left=Number(data.expires_in_seconds)||0;
+   if(left<=0)throw new Error('Votre session de 20 minutes est terminée.');
+  }catch(err){
+   console.warn('Vérification périodique de session ANI-IGT:',err);
+   clearTimeout(expiryTimer);clearInterval(sessionValidationTimer);sessionValidationTimer=null;
+   currentUser=null;currentProfile=null;
+   await client.auth.signOut();
+   gate.hidden=false;toolsBox.hidden=true;userBox.hidden=true;
+   document.body.classList.add('igt-auth-pending');
+   setMessage(err.message||'Votre accès a été interrompu. Veuillez vous reconnecter.','#b42318');
+  }finally{sessionCheckBusy=false;}
+ }
+ function startSessionMonitoring(){
+  clearInterval(sessionValidationTimer);
+  // Vérification serveur toutes les 15 secondes : suspension/révocation détectée rapidement.
+  sessionValidationTimer=setInterval(validateActiveSession,15000);
  }
  async function heartbeat(){if(!currentUser)return;const {error}=await client.from('user_presence').upsert({user_id:currentUser.id,last_seen:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)console.warn('Présence non actualisée',error);}
  async function showSession(session){
   if(passwordSetupMode||updatingPassword)return;
-  if(!session){clearTimeout(expiryTimer);currentUser=null;currentProfile=null;gate.hidden=false;userBox.hidden=true;toolsBox.hidden=true;document.body.classList.add('igt-auth-pending');return;}
+  if(!session){clearTimeout(expiryTimer);clearInterval(sessionValidationTimer);sessionValidationTimer=null;currentUser=null;currentProfile=null;gate.hidden=false;userBox.hidden=true;toolsBox.hidden=true;document.body.classList.add('igt-auth-pending');return;}
   try{
    await startSession();
    const {data,error}=await client.from('profiles').select('display_name,role,is_active').eq('id',session.user.id).maybeSingle();
@@ -214,16 +255,17 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
    gate.hidden=true;document.body.classList.remove('igt-auth-pending');userBox.hidden=false;toolsBox.hidden=false;adminButton.hidden=!(session.user.id===ADMIN_ID&&data.role==='super_admin');
    userBox.replaceChildren(document.createTextNode((data.display_name||session.user.email||'Utilisateur')+' · '+(data.role==='super_admin'?'Super administrateur':'Agent')));
    const timer=document.createElement('span');timer.style.marginLeft='8px';timer.style.fontSize='11px';timer.textContent='Session : 20 min max';userBox.appendChild(timer);
-   const btn=document.createElement('button');btn.type='button';btn.textContent='Déconnexion';btn.addEventListener('click',async()=>{clearTimeout(expiryTimer);await client.auth.signOut();location.reload();});userBox.appendChild(btn);
+   const btn=document.createElement('button');btn.type='button';btn.textContent='Déconnexion';btn.addEventListener('click',async()=>{clearTimeout(expiryTimer);clearInterval(sessionValidationTimer);sessionValidationTimer=null;await client.auth.signOut();location.reload();});userBox.appendChild(btn);
+   startSessionMonitoring();
    await heartbeat();
    if(window.igtRefreshInbox)window.igtRefreshInbox();
-  }catch(err){console.error('Contrôle session ANI-IGT',err);await client.auth.signOut();gate.hidden=false;toolsBox.hidden=true;setMessage(err.message||'Session invalide. Veuillez vous reconnecter.');}
+  }catch(err){console.error('Contrôle session ANI-IGT',err);clearTimeout(expiryTimer);clearInterval(sessionValidationTimer);sessionValidationTimer=null;currentUser=null;currentProfile=null;await client.auth.signOut();gate.hidden=false;userBox.hidden=true;toolsBox.hidden=true;document.body.classList.add('igt-auth-pending');setMessage(err.message||'Session invalide. Veuillez vous reconnecter.');}
  }
  async function saveNewPassword(){const pw=passwordInput.value;if(pw.length<8){setMessage('Choisissez un mot de passe d’au moins 8 caractères.');return;}if(pw!==confirmInput.value){setMessage('Les deux mots de passe ne correspondent pas.');return;}submit.disabled=true;updatingPassword=true;const {error}=await client.auth.updateUser({password:pw});updatingPassword=false;if(error){setMessage('Impossible d’enregistrer le mot de passe : '+error.message);submit.disabled=false;return;}await client.auth.signOut();showLogin();form.reset();gate.hidden=false;setMessage('Mot de passe enregistré. Vous pouvez maintenant vous connecter.','#138a65');submit.disabled=false;try{history.replaceState({},document.title,location.pathname);}catch(e){}}
  form.addEventListener('submit',async e=>{e.preventDefault();if(passwordSetupMode){await saveNewPassword();return;}submit.disabled=true;submit.textContent='Connexion…';setMessage('');const {data,error}=await client.auth.signInWithPassword({email:emailInput.value.trim(),password:passwordInput.value});if(error){setMessage('Connexion impossible. Vérifiez vos identifiants.');submit.disabled=false;submit.textContent='Se connecter';return;}await showSession(data.session);submit.disabled=false;submit.textContent='Se connecter';});
  confirmInput.addEventListener('input',()=>{if(message.textContent)setMessage('');});
  if(urlIndicatesSetup())showPasswordSetup();
- client.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'||(event==='SIGNED_IN'&&urlIndicatesSetup())){showPasswordSetup();return;}if(event==='SIGNED_OUT'&&!passwordSetupMode){clearTimeout(expiryTimer);gate.hidden=false;userBox.hidden=true;toolsBox.hidden=true;document.body.classList.add('igt-auth-pending');}if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'||event==='INITIAL_SESSION')setTimeout(()=>showSession(session),0);});
+ client.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'||(event==='SIGNED_IN'&&urlIndicatesSetup())){showPasswordSetup();return;}if(event==='SIGNED_OUT'&&!passwordSetupMode){clearTimeout(expiryTimer);clearInterval(sessionValidationTimer);sessionValidationTimer=null;currentUser=null;currentProfile=null;gate.hidden=false;userBox.hidden=true;toolsBox.hidden=true;document.body.classList.add('igt-auth-pending');}if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'||event==='INITIAL_SESSION')setTimeout(()=>showSession(session),0);});
  client.auth.getSession().then(({data})=>{if(urlIndicatesSetup()&&data.session)showPasswordSetup();else showSession(data.session);});
  setInterval(()=>{if(currentUser)heartbeat();},30000);
  window.igtClient=client;window.igtAdminId=ADMIN_ID;
