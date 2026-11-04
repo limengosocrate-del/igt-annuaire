@@ -70,6 +70,14 @@ body.dark .igt-footer strong{color:#8bceff}
 .igt-footer a{text-decoration:underline!important;text-underline-offset:3px}
 </style>
 
+
+<style id="igt-footer-final-style">
+#igt-footer{background:#1d4787!important;color:#fff!important}
+#igt-footer .footer-inner,#igt-footer .footer-inner *{color:#fff!important}
+#igt-footer .footer-bottom{background:#123d70!important;color:#fff!important}
+#igt-footer .footer-inner{background:transparent!important}
+</style>
+
 </head><body class="igt-auth-pending"><div id="igt-auth-gate" role="dialog" aria-modal="true" aria-labelledby="igt-auth-title">
  <form id="igt-auth-card">
   <div style="font-size:12px;letter-spacing:1.5px;font-weight:700;color:#b18a35">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
@@ -179,50 +187,78 @@ function findAgents(q){
 function esc(x){return String(x||'Non renseigné').replace(/</g,'&lt;')}
 function cleanIdentity(name,a){let n=String(name||'').trim();let context=[...(a.lieu_affectation||'').split('/'),a.province_affectation||'', 'TSUAPA','TSHUAPA','BOENDE','KINSHASA','GOMBE','LUBUMBASHI','KISANGANI','BUKAVU','GOMA','MATADI','TSHIKAPA','KANANGA','KABINDA','KOLWEZI','BUNIA','KINDU','LISALA','GBADOLITE','LUSAMBO','KALEMIE','MBANDAKA','BUTA','ISIRO','INONGO','GEMENA','KIKWIT','BANDUNDU','MBUJI-MAYI'];let changed=true;while(changed){changed=false;n=n.replace(/^(?:DIRECTION\s+PROVINCIALE|ADMINISTRATION\s+CENTRALE|INSPECTION\s+(?:URBAINE|LOCALE)|ANTENNE\s+(?:DE|D[’'])?)\s+/i,'');for(const v of context){let z=String(v).trim();let safe=z.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&');if(z&&new RegExp('^'+safe+'\s+','i').test(n)&&n.trim().split(/\s+/).length>2){n=n.replace(new RegExp('^'+safe+'\s+','i'),'');changed=true}}}return n} 
 function bankPayeuse(province,place,service){
- let p=norm(province||'').toUpperCase(),l=norm(place||'').toUpperCase(),s=norm(service||'').toUpperCase();
- const maps={
-  'MAINDOMBE':{default:'RAWBANK',places:{}},
-  'MANIEMA':{default:'TMB',places:{}},
-  'MONGALA':{default:'RAWBANK',places:{}},
-  'NORDKIVU':{default:'TMB',places:{'LUBERO':'EQUITY BCDC','RUTSHURU':'RAWBANK'}},
-  'NORDUBANGI':{default:'TMB',places:{}},
-  'SANKURU':{default:'RAWBANK',places:{'LODJA':'TMB'}},
-  'SUDKIVU':{default:'BOA',places:{'BARAKA':'FBN BANK','UVIRA':'FBN BANK','KAMITUGA':'EQUITY BCDC','WALUNGU':'EQUITY BCDC'}},
-  'SUDUBANGI':{default:'RAWBANK',places:{'BOZENE':'BCDC GEMENA'}},
-  'KASAI':{default:'ADVANS CONGO',places:{'ILEBO':'SOFIBANQUE'}},
-  'KASAÏ':{default:'ADVANS CONGO',places:{'ILEBO':'SOFIBANQUE'}},
-  'KASAÏORIENTAL':{default:'EQUITY BCDC',places:{'MIABI':'TMB'}},
-  'KONGOCENTRAL':{default:'RAWBANK',places:{}},
-  'KWANGO':{default:'RAWBANK',places:{'FESHI':'ECOBANK','KASONGOLUNDA':'ECOBANK','KAHEMBA':'TMB','POPOKABAKA':'TMB'}},
-  'KWILU':{default:'TMB',places:{'BAGATA':'RAWBANK','GUNGU':'ECOBANK','IDIOFA':'AFRILAND','KIKWIT':'ECOBANK','MASIMANIMBA':'ECOBANK'}},
-  'LOMAMI':{default:'EQUITY BCDC',places:{'MWENEDITU':'TMB'}},
-  'LUALABA':{default:'EQUITY BCDC',places:{'KASANDJI':'BCC KOLWEZI'}}
+ const p=norm(province||'').toUpperCase();
+ const l=norm(place||'').toUpperCase();
+ const s=norm(service||'').toUpperCase();
+ const configs={
+  MAINDOMBE:{provincial:'RAWBANK',units:{
+   KUTU:'RAWBANK',MUSHIE:'RAWBANK',INONGO:'RAWBANK'
+  }},
+  MANIEMA:{provincial:'TMB',units:{
+   KASONGO:'TMB',KINDU:'TMB',LUBUTU:'TMB'
+  }},
+  MONGALA:{provincial:'RAWBANK',units:{
+   BONGANDANGA:'RAWBANK',BUMBA:'RAWBANK',LISALA:'RAWBANK'
+  }},
+  NORDKIVU:{provincial:'TMB',units:{
+   BENI:'TMB','BENITERRITOIRE':'TMB',BUTEMBO:'TMB',GOMA:'TMB',
+   LUBERO:'EQUITY BCDC',RUTSHURU:'RAWBANK'
+  }},
+  NORDUBANGI:{provincial:'TMB',units:{
+   BUSINGA:'TMB',GBADOLITE:'TMB'
+  }},
+  SANKURU:{provincial:'RAWBANK',units:{
+   LODJA:'TMB',LUSAMBO:'RAWBANK'
+  }},
+  SUDKIVU:{provincial:'BOA',units:{
+   BARAKA:'FBN BANK',BUKAVU:'BOA',IDJWI:'BOA',KABARE:'BOA',
+   KALEHE:'BOA',KAMITUGA:'EQUITY BCDC',SHABUNDA:'BOA',
+   UVIRA:'FBN BANK',WALUNGU:'EQUITY BCDC'
+  }},
+  SUDUBANGI:{provincial:'RAWBANK',units:{
+   BOZENE:'BCDC GEMENA',GEMENA:'RAWBANK'
+  }},
+  KASAI:{provincial:'ADVANS CONGO',units:{
+   TSHIKAPA:'ADVANS CONGO',ILEBO:'SOFIBANQUE'
+  }},
+  KASAIORIENTAL:{provincial:'EQUITY BCDC',units:{
+   'MBUJIMAYI':'EQUITY BCDC',MIABI:'TMB'
+  }},
+  KONGOCENTRAL:{provincial:'RAWBANK',units:{
+   BOMA:'RAWBANK',CATARACTES:'RAWBANK',INKISI:'RAWBANK',
+   MATADI:'RAWBANK',MUANDA:'RAWBANK',TSHELA:'RAWBANK'
+  }},
+  KWANGO:{provincial:'RAWBANK',units:{
+   FESHI:'ECOBANK',KAHEMBA:'TMB','KASONGOLUNDA':'ECOBANK',
+   KENGE:'RAWBANK','KENGETERRITOIRE':'RAWBANK',POPOKABAKA:'TMB'
+  }},
+  KWILU:{provincial:'TMB',units:{
+   BAGATA:'RAWBANK','BANDUNDUVILLE':'TMB',BULUNGU:'TMB',
+   GUNGU:'ECOBANK',IDIOFA:'AFRILAND',KIKWIT:'ECOBANK',
+   'MASIMANIMBA':'ECOBANK'
+  }},
+  LOMAMI:{provincial:'EQUITY BCDC',units:{
+   KABINDA:'EQUITY BCDC','MWENEDITU':'TMB'
+  }},
+  LUALABA:{provincial:'EQUITY BCDC',units:{
+   KASANDJI:'BCC KOLWEZI',KOLWEZI:'EQUITY BCDC'
+  }},
+  KASAICENTRAL:{provincial:'EQUITY BCDC',units:{
+   KANANGA:'EQUITY BCDC',TSHIMBULU:'FBN BANK'
+  }}
  };
- // Alias province (normalisation des accents et séparateurs).
- const aliases={'KASAICENTRAL':'KASAICENTRAL','KASAÏCENTRAL':'KASAICENTRAL','KASAÏORIENTAL':'KASAIORIENTAL','KASAIIORIENTAL':'KASAIORIENTAL','KONGO CENTRAL':'KONGOCENTRAL'};
- if(aliases[p])p=aliases[p];
- let key=p.replace(/[^A-Z0-9]/g,'');
- if(key==='KASAICENTRAL'||key==='KASAICENTRAL')return '';
- if(key==='KASAIIORIENTAL')key='KASAIORIENTAL';
- // Règles historiques déjà présentes dans le répertoire.
- if(key==='KINSHASA')return 'RAWBANK';
- if(key==='BASUELE')return ['ANGO','BONDO','BUTA'].includes(l)?'RAWBANK':'';
- if(key==='EQUATEUR')return ({INGENDE:'BCC MBANDAKA',MBANDAKA:'TMB'})[l]||'';
- if(key==='HAUTKATANGA')return ({KASENGA:'ECOBANK',KASUMBALESA:'BCC HAUT-KATANGA',KIPUSHI:'ECOBANK',LIKASI:'BOA',LUBUMBASHI:'ACCESS BANK',SAKANIA:'ECOBANK'})[l]||'';
- if(key==='HAUTLOMAMI')return ['KAMINA','MALEMBANKULU'].includes(l)?'AFRILAND':'';
- if(key==='HAUTUELE')return ({ISIRO:'EQUITY BCDC',NIANGARA:'EQUITY BCDC',WATSA:'RAWBANK'})[l]||'';
- if(key==='ITURI')return ({BUNIA:'FBN BANK',ARU:'EQUITY BCDC',MAMBASA:'RAWBANK'})[l]||'';
- if(key==='TANGANYIKA')return ({KALEMIE:'AFRILAND',KONGOLO:'BCC KALEMI',MOBA:'TMB'})[l]||'';
- if(key==='TSHOPO')return ['BAFWASENDE','BANALIA','ISANGI','KISANGANI'].includes(l)?'RAWBANK':'';
- if(key==='TSHUAPA')return ['BOENDE','IKELA'].includes(l)?'AFRILAND':'';
- const cfg=maps[key];
+ const cfg=configs[p];
  if(!cfg)return '';
- // Les lieux explicitement cités priment sur la banque par défaut de la province.
- for(const [placeName,bank] of Object.entries(cfg.places)){
-  if(l.includes(placeName)||s.includes(placeName))return bank;
+ // Priorité au lieu/à l'antenne : certains dossiers portent « Direction
+ // Provinciale » dans le champ de service même lorsque l'agent est affecté
+ // dans une antenne. Les antennes nommées doivent donc être traitées d'abord.
+ const keys=Object.keys(cfg.units).sort((a,b)=>b.length-a.length);
+ for(const unit of keys){
+  if(l===unit||s.includes(unit))return cfg.units[unit];
  }
- // Les divisions/directions provinciales utilisent la banque provinciale par défaut.
- return cfg.default;
+ // Les divisions/directions provinciales reçoivent ensuite la banque provinciale.
+ if(/(?:DIVISION|DIRECTION)PROVINCIALE/.test(s))return cfg.provincial;
+ return '';
 }
 function dossier(a){let t=(a.fonction_et_affectation_transcrites||'').replace(/\s+\d{1,3}\s*$/,'').trim();let place='Non renseigné';let m=t.match(/\s+((?:[A-ZÀ-Ÿ]{3,}(?:\/[A-ZÀ-Ÿ]+)?|[A-Z][a-zà-ÿ]+)(?:\s*\/\s*[A-ZÀ-Ÿ]+)?)\s*$/);if(m){place=m[1];t=t.slice(0,m.index).replace(/[,:;\s]+$/,'')}let parts=t.split(',').map(x=>x.trim()).filter(Boolean),fonction=t||'Non renseignée',service=parts.slice(1).join(' · ')||'Non renseigné';let province='Non renseignée';let p=(a.fonction_et_affectation_transcrites||'').match(/(?:KINSHASA|KASAÏ(?:-CENTRAL|-ORIENTAL)?|KONGO CENTRAL|ÉQUATEUR|HAUT-KATANGA|HAUT-LOMAMI|ITURI|KWANGO|KWILU|LOMAMI|LUALABA|MANIEMA|MONGALA|NORD-KIVU|SUD-KIVU|SANKURU|TANGANYIKA|TSHOPO|TSHUAPA|MAI-NDOMBE|BAS-UELE|HAUT-UELE|NORD-UBANGI|SUD-UBANGI)/i);if(p)province=p[0];else if(place.includes('/'))province=place.split('/')[0];else {let local=place.toUpperCase(),zones={KABINDA:'Lomami',KOLWEZI:'Lualaba',LUBUMBASHI:'Haut-Katanga',BUNIA:'Ituri',KISANGANI:'Tshopo',BUKAVU:'Sud-Kivu',GOMA:'Nord-Kivu',MATADI:'Kongo Central',TSHIKAPA:'Kasaï',KANANGA:'Kasaï-Central',MBUJI:'Kasaï-Oriental',LUSAMBO:'Sankuru',KALEMIE:'Tanganyika',KINDU:'Maniema',INONGO:'Mai-Ndombe',BANDUNDU:'Kwilu',KIKWIT:'Kwilu',LISALA:'Mongala',GBADOLITE:'Nord-Ubangi',GEMENA:'Sud-Ubangi',BUTA:'Bas-Uele',ISIRO:'Haut-Uele',MBO:'Équateur'};for(let k in zones)if(local.includes(k)){province=zones[k];break}}if(a.fonction_vide)fonction='';if(a.fonction_affichee)fonction=a.fonction_affichee;if(a.lieu_affectation&&a.lieu_affectation!=='Non renseigné')place=a.lieu_affectation;if(a.province_affectation&&a.province_affectation!=='Non renseignée')province=a.province_affectation;if(a.direction_affectation)service=a.direction_affectation;let banque=bankPayeuse(province,place,service)||(a.banque_payeuse||'Non renseignée');return {fonction,service,lieu:place,province,banque}}
 const gradeDescriptions={'110':'Grade 110','120':'Inspecteur Principal du Travail de 1ère classe','130':'Inspecteur Principal du Travail de 2ème classe','140':'Inspecteur du travail','210':'Contrôleur du travail','220':'Grade 220','240':'Contrôleur du travail (grade 240)','310':'Grade 310','320':'Grade 320'};
@@ -753,5 +789,21 @@ body{background:#f3f6f9!important;color:var(--igt-ink)}
   .igt-footer .footer-inner{padding:30px 20px 22px!important}
 }
 </style>
+
+
+<script id="igt-footer-cleanup">
+document.addEventListener('DOMContentLoaded',function(){
+ const footer=document.getElementById('igt-footer');
+ if(!footer)return;
+ footer.querySelectorAll('a,span,p,div,h2,h3,h4').forEach(function(el){
+  const label=(el.textContent||'').trim().toLocaleLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+  if(label==='direction provinciale'||label==='directions provinciales'||
+     label==='direction provincial'||label==='directions provincial'){
+   el.remove();
+  }
+ });
+});
+</script>
 
 </body></html>
