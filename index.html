@@ -43,21 +43,22 @@ body.dark .igt-footer strong{color:#8bceff}
  <form id="igt-auth-card">
   <div style="font-size:12px;letter-spacing:1.5px;font-weight:700;color:#b18a35">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
   <h2 id="igt-auth-title">Annuaire numérique de l’IGT</h2>
-  <p>Accès réservé aux agents enregistrés dans le registre officiel de l’Inspection Générale du Travail.</p>
+  <p>Connectez-vous à votre espace IGT. L’administrateur unique dispose de l’espace de gestion complet.</p>
   <label for="igt-auth-email">Adresse e-mail</label><input id="igt-auth-email" type="email" autocomplete="username" required placeholder="nom@exemple.com">
   <label for="igt-auth-password">Mot de passe</label><input id="igt-auth-password" type="password" autocomplete="current-password" required placeholder="Votre mot de passe">
   <div id="igt-auth-confirm-wrap" hidden><label for="igt-auth-confirm">Confirmer le nouveau mot de passe</label><input id="igt-auth-confirm" type="password" autocomplete="new-password" placeholder="Répétez le nouveau mot de passe"></div>
   <button id="igt-auth-submit" type="submit">Se connecter</button>
-  <button id="igt-open-registration" type="button" style="width:100%;margin-top:10px;padding:12px;border:1px solid #0d4772;border-radius:9px;background:#fff;color:#0d4772;font-weight:700;font-size:14px">Créer mon compte agent</button>
+  <button id="igt-forgot-password" type="button" style="width:100%;margin-top:10px;padding:9px;border:0;background:transparent;color:#0d4772;text-decoration:underline;font-weight:600;cursor:pointer">Mot de passe oublié ?</button>
+  <button id="igt-open-registration" type="button" style="width:100%;margin-top:8px;padding:12px;border:1px solid #0d4772;border-radius:9px;background:#fff;color:#0d4772;font-weight:700;font-size:14px">Créer mon compte agent</button>
   <div id="igt-auth-message" role="status" aria-live="polite"></div>
-  <p style="font-size:12px;margin-bottom:0">L'inscription est réservée aux agents dont l'identité, la catégorie et le matricule correspondent au registre officiel. Une session dure 20 minutes.</p>
+  <p style="font-size:12px;margin-bottom:0">Agents : créez votre compte avec vos informations officielles. Session sécurisée de 20 minutes.</p>
  </form>
 </div>
 <div id="igt-registration-panel" hidden role="dialog" aria-modal="true" aria-labelledby="igt-reg-title" style="position:fixed;inset:0;z-index:1000000;background:#061a30ee;overflow:auto;padding:18px;box-sizing:border-box">
  <form id="igt-registration-form" style="max-width:480px;margin:25px auto;background:#fff;color:#172334;border-radius:18px;padding:24px;box-shadow:0 20px 70px #0006;font-family:Arial,sans-serif">
   <div style="font-size:11px;letter-spacing:1px;font-weight:700;color:#b18a35">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
   <h2 id="igt-reg-title" style="color:#123d60;margin:8px 0">Créer un compte ANI-IGT</h2>
-  <p style="color:#5b6572;line-height:1.45">Saisissez exactement vos informations telles qu'elles figurent dans le registre officiel du personnel. Si elles correspondent, votre compte sera activé immédiatement.</p>
+  <p style="color:#5b6572;line-height:1.45">Remplissez vos informations officielles, choisissez un mot de passe et créez votre compte. L'identité, la catégorie et le matricule sont vérifiés dans le registre IGT.</p>
   <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-name">Nom complet (nom, postnom et prénom)</label><input id="igt-reg-name" required maxlength="180" autocomplete="name" placeholder="Nom complet officiel" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
   <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-category">Catégorie</label><select id="igt-reg-category" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px;background:#fff"><option value="">Sélectionner votre catégorie</option><option value="inspecteur">Inspecteur du travail</option><option value="controleur">Contrôleur du travail</option><option value="agent_administratif">Agent administratif</option></select>
   <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-matricule">Numéro matricule officiel</label><input id="igt-reg-matricule" required maxlength="80" placeholder="Votre matricule officiel" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
@@ -186,13 +187,14 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
  const emailLabel=emailInput.previousElementSibling, passwordLabel=passwordInput.previousElementSibling;
  const confirmWrap=document.getElementById('igt-auth-confirm-wrap'), confirmInput=document.getElementById('igt-auth-confirm');
  const adminButton=document.getElementById('igt-open-admin');
+ const forgotButton=document.getElementById('igt-forgot-password');
  let passwordSetupMode=false, updatingPassword=false, expiryTimer=null, sessionValidationTimer=null, sessionStartPromise=null, sessionCheckBusy=false, currentUser=null, currentProfile=null, remainingSeconds=0;
  if(!window.supabase||!window.supabase.createClient){message.textContent='Service de connexion indisponible. Rechargez la page.';return;}
  const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
  window.igtSupabase=client;
- function showLogin(){passwordSetupMode=false;title.textContent='Annuaire numérique de l’IGT';intro.textContent='Accès réservé aux agents enregistrés dans le registre officiel.';confirmWrap.hidden=true;emailLabel.hidden=false;emailInput.hidden=false;emailInput.required=true;passwordLabel.textContent='Mot de passe';passwordInput.autocomplete='current-password';submit.textContent='Se connecter';}
+ function showLogin(){passwordSetupMode=false;title.textContent='Annuaire numérique de l’IGT';intro.textContent='Accès réservé aux agents enregistrés dans le registre officiel.';confirmWrap.hidden=true;emailLabel.hidden=false;emailInput.hidden=false;emailInput.required=true;passwordLabel.textContent='Mot de passe';passwordInput.autocomplete='current-password';submit.textContent='Se connecter';forgotButton.hidden=false;}
  function urlIndicatesSetup(){const q=new URLSearchParams(location.search),h=new URLSearchParams(location.hash.replace(/^#/,''));return [q.get('type'),h.get('type')].some(v=>v==='invite'||v==='recovery'||v==='signup');}
- function showPasswordSetup(){passwordSetupMode=true;gate.hidden=false;document.body.classList.add('igt-auth-pending');title.textContent='Définir votre mot de passe';intro.textContent='Créez votre mot de passe personnel.';emailLabel.hidden=true;emailInput.hidden=true;emailInput.required=false;passwordLabel.textContent='Nouveau mot de passe';passwordInput.value='';passwordInput.autocomplete='new-password';confirmWrap.hidden=false;submit.textContent='Enregistrer mon mot de passe';}
+ function showPasswordSetup(){passwordSetupMode=true;gate.hidden=false;document.body.classList.add('igt-auth-pending');title.textContent='Réinitialiser votre mot de passe';intro.textContent='Choisissez un nouveau mot de passe pour votre compte IGT.';emailLabel.hidden=true;emailInput.hidden=true;emailInput.required=false;passwordLabel.textContent='Nouveau mot de passe';passwordInput.value='';passwordInput.autocomplete='new-password';confirmWrap.hidden=false;submit.textContent='Enregistrer mon mot de passe';forgotButton.hidden=true;}
  function setMessage(text,color){message.textContent=text;message.style.color=color||'#a32626';}
  async function startSession(){
   // Évite deux initialisations simultanées lors de SIGNED_IN et INITIAL_SESSION.
@@ -261,6 +263,19 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
    if(window.igtRefreshInbox)window.igtRefreshInbox();
   }catch(err){console.error('Contrôle session ANI-IGT',err);clearTimeout(expiryTimer);clearInterval(sessionValidationTimer);sessionValidationTimer=null;currentUser=null;currentProfile=null;await client.auth.signOut();gate.hidden=false;userBox.hidden=true;toolsBox.hidden=true;document.body.classList.add('igt-auth-pending');setMessage(err.message||'Session invalide. Veuillez vous reconnecter.');}
  }
+ forgotButton.addEventListener('click',async()=>{
+  const email=emailInput.value.trim().toLowerCase();
+  if(!email){setMessage('Saisissez d’abord votre adresse e-mail pour recevoir le lien de réinitialisation.');emailInput.focus();return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setMessage('Veuillez saisir une adresse e-mail valide.');emailInput.focus();return;}
+  forgotButton.disabled=true;forgotButton.textContent='Envoi du lien…';setMessage('');
+  try{
+   const redirectTo=location.origin+location.pathname;
+   const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo});
+   if(error)throw error;
+   setMessage('Si cette adresse correspond à un compte, un lien de réinitialisation vient d’être envoyé. Vérifiez votre boîte e-mail et vos courriers indésirables.','#138a65');
+  }catch(err){console.error('Réinitialisation mot de passe ANI-IGT:',err);setMessage('Impossible d’envoyer le lien pour le moment. Réessayez ou contactez Pmiller.');}
+  finally{forgotButton.disabled=false;forgotButton.textContent='Mot de passe oublié ?';}
+ });
  async function saveNewPassword(){const pw=passwordInput.value;if(pw.length<8){setMessage('Choisissez un mot de passe d’au moins 8 caractères.');return;}if(pw!==confirmInput.value){setMessage('Les deux mots de passe ne correspondent pas.');return;}submit.disabled=true;updatingPassword=true;const {error}=await client.auth.updateUser({password:pw});updatingPassword=false;if(error){setMessage('Impossible d’enregistrer le mot de passe : '+error.message);submit.disabled=false;return;}await client.auth.signOut();showLogin();form.reset();gate.hidden=false;setMessage('Mot de passe enregistré. Vous pouvez maintenant vous connecter.','#138a65');submit.disabled=false;try{history.replaceState({},document.title,location.pathname);}catch(e){}}
  form.addEventListener('submit',async e=>{e.preventDefault();if(passwordSetupMode){await saveNewPassword();return;}submit.disabled=true;submit.textContent='Connexion…';setMessage('');const {data,error}=await client.auth.signInWithPassword({email:emailInput.value.trim(),password:passwordInput.value});if(error){setMessage('Connexion impossible. Vérifiez vos identifiants.');submit.disabled=false;submit.textContent='Se connecter';return;}await showSession(data.session);submit.disabled=false;submit.textContent='Se connecter';});
  confirmInput.addEventListener('input',()=>{if(message.textContent)setMessage('');});
@@ -280,7 +295,7 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
  open.addEventListener('click',()=>{panel.hidden=false;msg.textContent='';});close.addEventListener('click',()=>{panel.hidden=true;});
  form.addEventListener('submit',async e=>{e.preventDefault();const pw=document.getElementById('igt-reg-password').value,pw2=document.getElementById('igt-reg-password2').value;if(pw.length<8){msg.textContent='Le mot de passe doit contenir au moins 8 caractères.';return;}if(pw!==pw2){msg.textContent='Les mots de passe ne correspondent pas.';return;}send.disabled=true;send.textContent='Création du compte…';msg.style.color='#334155';msg.textContent='Vérification de votre identité dans le registre officiel…';
   const payload={nom_complet:document.getElementById('igt-reg-name').value.trim(),categorie:document.getElementById('igt-reg-category').value,matricule:document.getElementById('igt-reg-matricule').value.trim(),telephone:document.getElementById('igt-reg-phone').value.trim(),email:document.getElementById('igt-reg-email').value.trim().toLowerCase(),password:pw,website:document.getElementById('igt-reg-website').value};
-  try{const {data,error}=await client.functions.invoke('igt-registration',{body:payload});if(error)throw new Error(data?.message||error.message);if(!data?.success)throw new Error(data?.message||'Inscription non effectuée.');msg.style.color='#08794f';msg.textContent='Compte créé et activé. Connexion en cours…';const {data:login,error:loginError}=await client.auth.signInWithPassword({email:payload.email,password:pw});if(loginError)throw new Error('Compte créé. Connectez-vous depuis l’écran principal : '+loginError.message);panel.hidden=true;form.reset();await client.auth.getSession().then(({data})=>window.igtClient&&window.igtClient.auth.getSession());location.reload();
+  try{const {data,error}=await client.functions.invoke('igt-registration',{body:payload});if(error){let detail='';try{const response=error.context;if(response&&typeof response.json==='function'){const body=await response.json();detail=body?.message||body?.error||body?.details||'';}}catch(_){}if(!detail&&data)detail=data.message||data.error||'';if(!detail){const raw=String(error.message||'');detail=raw.includes('non-2xx')?'Le service de création de compte a rencontré une erreur. Vérifiez les journaux de la fonction igt-registration dans Supabase.':raw;}throw new Error(detail||'Création du compte impossible. Réessayez ou contactez l’administrateur.');}if(!data?.success)throw new Error(data?.message||'Vos informations n’ont pas été validées dans le registre officiel.');msg.style.color='#08794f';msg.textContent='Compte créé et activé. Connexion en cours…';const {data:login,error:loginError}=await client.auth.signInWithPassword({email:payload.email,password:pw});if(loginError)throw new Error('Compte créé. Connectez-vous depuis l’écran principal : '+loginError.message);panel.hidden=true;form.reset();await client.auth.getSession().then(({data})=>window.igtClient&&window.igtClient.auth.getSession());location.reload();
   }catch(err){console.error('Inscription ANI-IGT',err);msg.style.color='#b42318';msg.textContent=err.message||'Impossible de créer le compte. Vérifiez les informations ou contactez Pmiller.';}finally{send.disabled=false;send.textContent='Créer mon compte';}
  });
  const workspace=document.getElementById('igt-workspace'),inbox=document.getElementById('igt-inbox'),adminSearch=document.getElementById('igt-admin-search'),usersBody=document.getElementById('igt-admin-users-body'),feedback=document.getElementById('igt-admin-feedback');
