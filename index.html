@@ -185,7 +185,44 @@ button,a,input,select,textarea{font-family:inherit}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
 
-</head><body class="igt-auth-pending"><div id="igt-auth-gate" role="dialog" aria-modal="true" aria-labelledby="igt-auth-title">
+
+<style id="igt-v7-professional-refresh">
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+html,body{max-width:100%;overflow-x:hidden}
+body.igt-auth-pending .hero-slide,body.igt-auth-pending .hero-copy,body.igt-auth-pending .hero-search{transform:none!important;animation:none!important;transition:none!important}
+body.igt-auth-pending .hero-slide{opacity:1!important}
+#igt-loading-screen{position:fixed;inset:0;z-index:2000000;background:radial-gradient(circle at 50% 35%,#173f69 0%,#07182f 58%,#030b18 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;box-sizing:border-box;font-family:Arial,sans-serif;animation:igtSplashOut .55s ease 1.65s forwards;pointer-events:none}
+#igt-loading-screen .igt-loader-mark{width:68px;height:68px;border:1px solid #d8b75d;border-radius:18px;display:grid;place-items:center;color:#e1c16c;font-size:36px;margin-bottom:24px;box-shadow:0 0 35px #d8b75d33}
+#igt-loading-screen .igt-loader-title{font-size:clamp(20px,4vw,30px);font-weight:800;line-height:1.35;max-width:650px}
+#igt-loading-screen .igt-loader-line{width:min(260px,75vw);height:3px;background:#ffffff25;border-radius:9px;margin:25px 0 15px;overflow:hidden}
+#igt-loading-screen .igt-loader-line span{display:block;width:40%;height:100%;background:#d8b75d;border-radius:9px;animation:igtLoading 1.1s ease-in-out infinite}
+#igt-loading-screen .igt-loader-sub{font-size:10px;letter-spacing:2px;color:#d9c27d;font-weight:700}
+@keyframes igtLoading{from{transform:translateX(-110%)}to{transform:translateX(280%)}}
+@keyframes igtSplashOut{to{opacity:0;visibility:hidden}}
+#igt-registration-panel{background-image:linear-gradient(135deg,#061a30a0,#0b3760a0),url('uploads/IMG_20260719_195903.jpg')!important;background-size:cover!important;background-position:center!important;background-attachment:fixed!important}
+#igt-registration-form{background:rgba(255,255,255,.88)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #ffffffb8!important}
+#igt-registration-form h2{font-size:clamp(23px,5vw,30px)!important}
+#igt-registration-form input,#igt-registration-form select{font-size:16px!important;min-height:48px}
+#igt-workspace{background:linear-gradient(135deg,#071b35ed,#123d60e8)!important;backdrop-filter:blur(5px)}
+#igt-workspace>section{max-width:1240px!important;border:1px solid #dbe7f1!important;border-radius:20px!important;padding:clamp(14px,3vw,28px)!important;box-shadow:0 24px 80px #0004!important}
+#igt-workspace h2{font-size:clamp(22px,4vw,30px)!important;font-weight:850!important;letter-spacing:-.3px}
+#igt-admin-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px!important}
+#igt-admin-stats>div{min-width:0;border:1px solid #dbe7f0!important;border-radius:15px!important;background:linear-gradient(145deg,#f7fbff,#eaf3fa)!important;box-shadow:0 5px 16px #123d6010}
+#igt-workspace button{cursor:pointer;transition:filter .15s ease,transform .15s ease}
+#igt-workspace button:hover{filter:brightness(1.04);transform:translateY(-1px)}
+#igt-workspace table{border-collapse:separate!important;border-spacing:0!important}
+#igt-workspace thead{position:sticky;top:0;z-index:2}
+#igt-workspace th{background:#eaf3fa!important;color:#174362!important;font-weight:800!important;letter-spacing:.3px}
+#igt-workspace td,#igt-workspace th{border-bottom:1px solid #e5edf3}
+#igt-inbox>section{border-radius:18px!important;box-shadow:0 24px 80px #0005!important}
+#igt-messages-list{background:#f7fafc}
+@media(max-width:700px){#igt-admin-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}#igt-workspace{padding:5px!important}#igt-workspace>section{margin:4px auto!important;padding:13px!important;border-radius:13px!important}#igt-workspace table{min-width:1050px!important}#igt-registration-panel{padding:10px!important}#igt-registration-form{margin:10px auto!important;padding:19px!important}}
+@media(prefers-reduced-motion:reduce){#igt-loading-screen .igt-loader-line span{animation:none}}
+</style>
+<script id="igt-v7-splash-cleanup">window.addEventListener('load',()=>{const splash=document.getElementById('igt-loading-screen');if(splash){setTimeout(()=>splash.remove(),2400);}});</script>
+
+</head><body class="igt-auth-pending"><div id="igt-loading-screen" aria-live="polite"><div class="igt-loader-mark">⚖</div><div class="igt-loader-title">Bienvenue dans l’Annuaire numérique de l’Inspection générale du Travail</div><div class="igt-loader-line"><span></span></div><div class="igt-loader-sub">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div></div>
+<div id="igt-auth-gate" role="dialog" aria-modal="true" aria-labelledby="igt-auth-title">
  <form id="igt-auth-card">
   <div style="font-size:12px;letter-spacing:1.5px;font-weight:700;color:#b18a35">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
   <h2 id="igt-auth-title">Annuaire numérique de l’inspection générale du Travail</h2>
@@ -200,11 +237,11 @@ button,a,input,select,textarea{font-family:inherit}
   <p style="font-size:12px;margin-bottom:0">Agents : créez votre compte avec vos informations officielles. Session sécurisée de 20 minutes.</p>
  </form>
 </div>
-<div id="igt-registration-panel" hidden role="dialog" aria-modal="true" aria-labelledby="igt-reg-title" style="position:fixed;inset:0;z-index:1000000;background:#061a30ee;overflow:auto;padding:18px;box-sizing:border-box">
- <form id="igt-registration-form" style="max-width:480px;margin:25px auto;background:#fff;color:#172334;border-radius:18px;padding:24px;box-shadow:0 20px 70px #0006;font-family:Arial,sans-serif">
+<div id="igt-registration-panel" hidden role="dialog" aria-modal="true" aria-labelledby="igt-reg-title" style="position:fixed;inset:0;z-index:1000000;background:linear-gradient(135deg,#061a30a8,#0b3760a8),url('uploads/IMG_20260719_195903.jpg') center/cover fixed;overflow:auto;padding:18px;box-sizing:border-box">
+ <form id="igt-registration-form" style="max-width:480px;margin:25px auto;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#172334;border:1px solid #ffffffaa;border-radius:20px;padding:24px;box-shadow:0 20px 70px #0006;font-family:Arial,sans-serif">
   <div style="font-size:11px;letter-spacing:1px;font-weight:700;color:#b18a35">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
   <h2 id="igt-reg-title" style="color:#123d60;margin:8px 0">Créer un compte ANI-IGT</h2>
-  <p style="color:#5b6572;line-height:1.45">Tout agent IGT peut créer librement son compte et accéder immédiatement à l’application. Vos informations officielles sont vérifiées dans le registre IGT. Seul l’administrateur Pmiller peut suspendre ou réactiver un compte.</p>
+  <p style="color:#5b6572;line-height:1.45">Tout agent IGT peut créer librement son compte et accéder immédiatement à l’application.</p>
   <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-name">Nom complet (nom, postnom et prénom)</label><input id="igt-reg-name" required maxlength="180" autocomplete="name" placeholder="Nom complet officiel" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
   <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-category">Catégorie</label><select id="igt-reg-category" required style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px;background:#fff"><option value="">Sélectionner votre catégorie</option><option value="inspecteur">Inspecteur du travail</option><option value="controleur">Contrôleur du travail</option><option value="agent_administratif">Agent administratif</option></select>
   <label style="display:block;font-weight:600;margin:12px 0 5px" for="igt-reg-matricule">Numéro matricule officiel</label><input id="igt-reg-matricule" required maxlength="80" placeholder="Votre matricule officiel" style="box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd4df;border-radius:9px;font-size:16px">
@@ -611,9 +648,9 @@ function toggleTheme(){document.body.classList.toggle('dark');localStorage.setIt
  const panel=document.getElementById('igt-registration-panel'),open=document.getElementById('igt-open-registration'),close=document.getElementById('igt-close-registration');
  const form=document.getElementById('igt-registration-form'),msg=document.getElementById('igt-reg-message'),send=document.getElementById('igt-reg-submit');
  open.addEventListener('click',()=>{panel.hidden=false;msg.textContent='';});close.addEventListener('click',()=>{panel.hidden=true;});
- form.addEventListener('submit',async e=>{e.preventDefault();const pw=document.getElementById('igt-reg-password').value,pw2=document.getElementById('igt-reg-password2').value;if(pw.length<8){msg.textContent='Le mot de passe doit contenir au moins 8 caractères.';return;}if(pw!==pw2){msg.textContent='Les mots de passe ne correspondent pas.';return;}send.disabled=true;send.textContent='Création du compte…';msg.style.color='#334155';msg.textContent='Vérification de votre identité dans le registre officiel…';
+ form.addEventListener('submit',async e=>{e.preventDefault();const pw=document.getElementById('igt-reg-password').value,pw2=document.getElementById('igt-reg-password2').value;if(pw.length<8){msg.textContent='Le mot de passe doit contenir au moins 8 caractères.';return;}if(pw!==pw2){msg.textContent='Les mots de passe ne correspondent pas.';return;}send.disabled=true;send.textContent='Création du compte…';msg.style.color='#334155';msg.textContent='Création de votre compte…';
   const payload={nom_complet:document.getElementById('igt-reg-name').value.trim(),categorie:({'inspecteur':'inspecteur_travail','controleur':'controleur_travail','agent_administratif':'agent_administratif'}[document.getElementById('igt-reg-category').value]||document.getElementById('igt-reg-category').value),matricule:document.getElementById('igt-reg-matricule').value.trim(),telephone:document.getElementById('igt-reg-phone').value.trim(),adresse_physique:document.getElementById('igt-reg-address').value.trim(),email:document.getElementById('igt-reg-email').value.trim().toLowerCase(),password:pw,website:document.getElementById('igt-reg-website').value};
-  try{const {data,error}=await client.functions.invoke('igt-registration',{body:payload});if(error){let detail='';try{const response=error.context;if(response&&typeof response.json==='function'){const body=await response.json();detail=body?.message||body?.error||body?.details||'';}}catch(_){}if(!detail&&data)detail=data.message||data.error||'';if(!detail){const raw=String(error.message||'');detail=raw.includes('non-2xx')?'Le service de création de compte a rencontré une erreur. Vérifiez les journaux de la fonction igt-registration dans Supabase.':raw;}throw new Error(detail||'Création du compte impossible. Réessayez ou contactez l’administrateur.');}if(!data?.success)throw new Error(data?.message||'Vos informations n’ont pas été validées dans le registre officiel.');msg.style.color='#08794f';msg.textContent='Votre compte est créé et activé. Connexion automatique…';const {data:login,error:loginError}=await client.auth.signInWithPassword({email:payload.email,password:pw});if(loginError)throw new Error('Compte créé. Connectez-vous depuis l’écran principal : '+loginError.message);panel.hidden=true;form.reset();await client.auth.getSession().then(({data})=>window.igtClient&&window.igtClient.auth.getSession());location.reload();
+  try{const {data,error}=await client.functions.invoke('igt-registration',{body:payload});if(error){let detail='';try{const response=error.context;if(response&&typeof response.json==='function'){const body=await response.json();detail=body?.message||body?.error||body?.details||'';}}catch(_){}if(!detail&&data)detail=data.message||data.error||'';if(!detail){const raw=String(error.message||'');detail=raw.includes('non-2xx')?'Le service de création de compte a rencontré une erreur. Vérifiez les journaux de la fonction igt-registration dans Supabase.':raw;}throw new Error(detail||'Création du compte impossible. Réessayez ou contactez l’administrateur.');}if(!data?.success)throw new Error(data?.message||'Création du compte impossible.');msg.style.color='#08794f';msg.textContent='Votre compte est créé et activé. Connexion automatique…';const {data:login,error:loginError}=await client.auth.signInWithPassword({email:payload.email,password:pw});if(loginError)throw new Error('Compte créé. Connectez-vous depuis l’écran principal : '+loginError.message);panel.hidden=true;form.reset();await client.auth.getSession().then(({data})=>window.igtClient&&window.igtClient.auth.getSession());location.reload();
   }catch(err){console.error('Inscription ANI-IGT',err);msg.style.color='#b42318';msg.textContent=err.message||'Impossible de créer le compte. Vérifiez les informations ou contactez Pmiller.';}finally{send.disabled=false;send.textContent='Créer mon compte';}
  });
  const workspace=document.getElementById('igt-workspace'),inbox=document.getElementById('igt-inbox'),adminSearch=document.getElementById('igt-admin-search'),usersBody=document.getElementById('igt-admin-users-body'),feedback=document.getElementById('igt-admin-feedback');
@@ -975,4 +1012,5 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
+<!-- ANI-IGT version 7 visual refresh -->
 </body></html>
